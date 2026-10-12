@@ -1,7 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View,
-} from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View, } from 'react-native';
 
 const courses = ['Starter', 'Main Course', 'Dessert'] as const;
 
@@ -9,15 +8,52 @@ type Course = (typeof courses)[number];
 type Page = 'add' | 'menu';
 
 type MenuItem = {
-  id: string; name: string; course: Course; description: string; price: number;
+  id: string;
+  name: string;
+  course: Course;
+  description: string;
+  price: number;
 };
 
 type FieldProps = {
-  label: string; value: string; placeholder: string; onChangeText: (value: string) => void; multiline?: boolean; returnKeyType?: 'next' | 'done';
+  label: string; value: string;
+  placeholder: string;
+  onChangeText: (value: string) => void;
+  multiline?: boolean;
+  returnKeyType?: 'next' | 'done';
+};
+
+const panel = {
+  backgroundColor: '#fffdf9',
+  borderWidth: 1,
+  borderColor: '#e8e2d7',
+};
+
+const field = {
+  backgroundColor: '#fbfaf6',
+  borderWidth: 1,
+  borderColor: '#dddcd2',
+  borderRadius: 10,
+};
+
+const center = {
+  alignItems: 'center' as const,
+  justifyContent: 'center' as const,
+};
+
+const muted = {
+  color: '#748078',
+  fontSize: 14,
+  lineHeight: 20,
 };
 
 function Field({
-  label, value, placeholder, onChangeText, multiline = false, returnKeyType,
+  label,
+  value,
+  placeholder,
+  onChangeText,
+  multiline = false,
+  returnKeyType,
 }: FieldProps) {
   return (
     <>
@@ -37,6 +73,26 @@ function Field({
   );
 }
 
+function Button({
+  label,
+  onPress,
+  outline = false,
+}: {
+  label: string;
+  onPress: () => void;
+  outline?: boolean;
+}) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      onPress={onPress}
+      style={({ pressed }) => [outline ? styles.addAnother : styles.primaryButton, pressed && styles.pressed]}
+    >
+      <Text style={outline ? styles.addAnotherText : styles.primaryText}>{label}</Text>
+    </Pressable>
+  );
+}
+
 export default function App() {
   const [items, setItems] = useState<MenuItem[]>([]);
   const [page, setPage] = useState<Page>('add');
@@ -49,8 +105,8 @@ export default function App() {
   const clearFeedback = () => setFeedback({ text: '', isError: false });
 
   const updateField =
-    (setter: (value: string) => void) => (value: string) => {
-      setter(value);
+    (setValue: (value: string) => void) => (value: string) => {
+      setValue(value);
       clearFeedback();
     };
 
@@ -96,6 +152,7 @@ export default function App() {
       },
       ...currentItems,
     ]);
+
     setName('');
     setCourse('');
     setDescription('');
@@ -106,35 +163,12 @@ export default function App() {
     });
   };
 
-  const renderButton = (
-    label: string,
-    onPress: () => void,
-    outline = false,
-  ) => (
-    <Pressable
-      accessibilityRole="button"
-      onPress={onPress}
-      style={({ pressed }) => [
-        outline ? styles.addAnother : styles.primaryButton,
-        pressed && styles.pressed,
-      ]}
-    >
-      <Text style={outline ? styles.addAnotherText : styles.primaryText}>
-        {label}
-      </Text>
-    </Pressable>
-  );
+  const isAddPage = page === 'add';
 
   return (
-    <KeyboardAvoidingView
-      style={styles.screen}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
+    <KeyboardAvoidingView style={styles.screen} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <StatusBar style="light" />
-      <ScrollView
-        contentContainerStyle={styles.content}
-        keyboardShouldPersistTaps="handled"
-      >
+      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <View style={styles.hero}>
           <Text style={styles.eyebrow}>A TASTE OF SOMETHING SPECIAL</Text>
           <Text style={styles.brand}>Christoffel's Dining</Text>
@@ -144,24 +178,15 @@ export default function App() {
         <View style={styles.navigation}>
           {(['add', 'menu'] as const).map((tab) => {
             const selected = page === tab;
-
             return (
               <Pressable
                 key={tab}
                 accessibilityRole="button"
                 accessibilityState={{ selected }}
                 onPress={() => setPage(tab)}
-                style={[
-                  styles.navButton,
-                  selected && styles.navSelected,
-                ]}
+                style={[styles.navButton, selected && styles.navSelected]}
               >
-                <Text
-                  style={[
-                    styles.navText,
-                    selected && styles.navTextSelected,
-                  ]}
-                >
+                <Text style={[styles.navText, selected && styles.navTextSelected]}>
                   {tab === 'add' ? '＋  Add dish' : `Menu  (${items.length})`}
                 </Text>
               </Pressable>
@@ -169,26 +194,17 @@ export default function App() {
           })}
         </View>
 
-        {page === 'add' ? (
+        {isAddPage ? (
           <View style={styles.card}>
             <Text style={styles.heading}>Create a menu item</Text>
-            <Text style={styles.hint}>
-              Name, course and price are required.
-            </Text>
+            <Text style={styles.hint}>Name, course and price are required.</Text>
 
-            <Field
-              label="Dish name *"
-              value={name}
-              onChangeText={updateField(setName)}
-              placeholder="e.g. Cape Malay curry"
-              returnKeyType="next"
-            />
+            <Field label="Dish name *" value={name} onChangeText={updateField(setName)} placeholder="e.g. Cape Malay curry" returnKeyType="next" />
 
             <Text style={styles.label}>Course *</Text>
             <View style={styles.courses}>
               {courses.map((option) => {
                 const selected = course === option;
-
                 return (
                   <Pressable
                     key={option}
@@ -198,31 +214,15 @@ export default function App() {
                       setCourse(option);
                       clearFeedback();
                     }}
-                    style={[
-                      styles.course,
-                      selected && styles.courseSelected,
-                    ]}
+                    style={[styles.course, selected && styles.courseSelected]}
                   >
-                    <Text
-                      style={[
-                        styles.courseText,
-                        selected && styles.courseTextSelected,
-                      ]}
-                    >
-                      {option}
-                    </Text>
+                    <Text style={[styles.courseText, selected && styles.courseTextSelected]}>{option}</Text>
                   </Pressable>
                 );
               })}
             </View>
 
-            <Field
-              label="Description"
-              value={description}
-              onChangeText={updateField(setDescription)}
-              placeholder="Tell guests what makes it special"
-              multiline
-            />
+            <Field label="Description" value={description} onChangeText={updateField(setDescription)} placeholder="Tell guests what makes it special" multiline />
 
             <Text style={styles.label}>Price in rands (R) *</Text>
             <View style={styles.priceBox}>
@@ -241,38 +241,16 @@ export default function App() {
             </View>
 
             {feedback.text ? (
-              <View
-                accessibilityRole="alert"
-                accessibilityLiveRegion="polite"
-                style={[
-                  styles.notice,
-                  feedback.isError
-                    ? styles.errorNotice
-                    : styles.successNotice,
-                ]}
-              >
-                <Text
-                  style={
-                    feedback.isError
-                      ? styles.errorText
-                      : styles.successText
-                  }
-                >
-                  {feedback.text}
-                </Text>
+              <View accessibilityRole="alert" accessibilityLiveRegion="polite" style={[styles.notice, feedback.isError ? styles.errorNotice : styles.successNotice]}>
+                <Text style={feedback.isError ? styles.errorText : styles.successText}>{feedback.text}</Text>
               </View>
             ) : null}
 
-            {renderButton('Add to menu', addItem)}
+            <Button label="Add to menu" onPress={addItem} />
 
             {items.length > 0 ? (
-              <Pressable
-                style={styles.textButton}
-                onPress={() => setPage('menu')}
-              >
-                <Text style={styles.textButtonLabel}>
-                  View menu · {items.length}
-                </Text>
+              <Pressable style={styles.textButton} onPress={() => setPage('menu')}>
+                <Text style={styles.textButtonLabel}>View menu · {items.length}</Text>
               </Pressable>
             ) : null}
           </View>
@@ -281,13 +259,9 @@ export default function App() {
             <View style={styles.menuHeader}>
               <View>
                 <Text style={styles.heading}>Our menu</Text>
-                <Text style={styles.hint}>
-                  Made with care, served with pride.
-                </Text>
+                <Text style={styles.hint}>Made with care, served with pride.</Text>
               </View>
-              <View style={styles.countBadge}>
-                <Text style={styles.countText}>{items.length}</Text>
-              </View>
+              <View style={styles.countBadge}><Text style={styles.countText}>{items.length}</Text></View>
             </View>
 
             {items.length > 0 ? (
@@ -298,71 +272,29 @@ export default function App() {
                       <Text style={styles.courseTag}>{item.course}</Text>
                       <Text style={styles.dishName}>{item.name}</Text>
                     </View>
-                    <Text style={styles.dishPrice}>
-                      R {item.price.toFixed(2)}
-                    </Text>
+                    <Text style={styles.dishPrice}>R {item.price.toFixed(2)}</Text>
                   </View>
-                  {item.description ? (
-                    <Text style={styles.dishDescription}>
-                      {item.description}
-                    </Text>
-                  ) : null}
+                  {item.description ? <Text style={styles.dishDescription}>{item.description}</Text> : null}
                 </View>
               ))
             ) : (
               <View style={styles.emptyCard}>
                 <Text style={styles.emptyIcon}>✦</Text>
-                <Text style={styles.emptyTitle}>
-                  A menu waiting to be made
-                </Text>
-                <Text style={styles.emptyText}>
-                  Add your first dish and it will appear here.
-                </Text>
-                {renderButton('Add your first dish', () => setPage('add'))}
+                <Text style={styles.emptyTitle}>A menu waiting to be made</Text>
+                <Text style={styles.emptyText}>Add your first dish and it will appear here.</Text>
+                <Button label="Add your first dish" onPress={() => setPage('add')} />
               </View>
             )}
 
-            {items.length > 0
-              ? renderButton(
-                  '＋  Add another dish',
-                  () => setPage('add'),
-                  true,
-                )
-              : null}
+            {items.length > 0 ? <Button label="＋  Add another dish" onPress={() => setPage('add')} outline /> : null}
           </View>
         )}
 
-        <Text style={styles.footer}>
-          CHRISTOFFEL'S DINING  ·  MADE WITH CARE
-        </Text>
+        <Text style={styles.footer}>CHRISTOFFEL'S DINING  ·  MADE WITH CARE</Text>
       </ScrollView>
     </KeyboardAvoidingView>
   );
 }
-
-const panelSurface = {
-  backgroundColor: '#fffdf9',
-  borderWidth: 1,
-  borderColor: '#e8e2d7',
-};
-
-const fieldSurface = {
-  backgroundColor: '#fbfaf6',
-  borderWidth: 1,
-  borderColor: '#dddcd2',
-  borderRadius: 10,
-};
-
-const centered = {
-  alignItems: 'center' as const,
-  justifyContent: 'center' as const,
-};
-
-const mutedCopy = {
-  color: '#748078',
-  fontSize: 14,
-  lineHeight: 20,
-};
 
 const styles = StyleSheet.create({
   screen: {
@@ -428,7 +360,7 @@ const styles = StyleSheet.create({
     color: '#1e5140',
   },
   card: {
-    ...panelSurface,
+    ...panel,
     borderRadius: 18,
     padding: 20,
   },
@@ -438,7 +370,7 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   hint: {
-    ...mutedCopy,
+    ...muted,
     marginTop: 5,
   },
   label: {
@@ -449,7 +381,7 @@ const styles = StyleSheet.create({
     marginBottom: 7,
   },
   input: {
-    ...fieldSurface,
+    ...field,
     minHeight: 48,
     color: '#203a31',
     paddingHorizontal: 13,
@@ -462,7 +394,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   course: {
-    ...fieldSurface,
+    ...field,
     minHeight: 42,
     justifyContent: 'center',
     paddingHorizontal: 13,
@@ -484,7 +416,7 @@ const styles = StyleSheet.create({
     minHeight: 78,
   },
   priceBox: {
-    ...fieldSurface,
+    ...field,
     minHeight: 48,
     flexDirection: 'row',
     alignItems: 'center',
@@ -529,7 +461,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   primaryButton: {
-    ...centered,
+    ...center,
     minHeight: 50,
     backgroundColor: '#bd6848',
     borderRadius: 11,
@@ -563,7 +495,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   countBadge: {
-    ...centered,
+    ...center,
     minWidth: 42,
     height: 42,
     borderRadius: 21,
@@ -575,7 +507,7 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   emptyCard: {
-    ...panelSurface,
+    ...panel,
     alignItems: 'center',
     borderRadius: 18,
     padding: 24,
@@ -592,14 +524,14 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   emptyText: {
-    ...mutedCopy,
+    ...muted,
     fontSize: 14,
     lineHeight: 21,
     textAlign: 'center',
     marginTop: 7,
   },
   menuCard: {
-    ...panelSurface,
+    ...panel,
     borderRadius: 15,
     padding: 17,
   },
@@ -631,11 +563,11 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   dishDescription: {
-    ...mutedCopy,
+    ...muted,
     marginTop: 9,
   },
   addAnother: {
-    ...centered,
+    ...center,
     minHeight: 49,
     borderWidth: 1,
     borderColor: '#327258',
